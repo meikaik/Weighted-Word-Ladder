@@ -1,6 +1,6 @@
 import string
 import fileinput
-from heapq import *
+from heapq import heappush, heappop
 
 
 class Graph:
@@ -8,6 +8,7 @@ class Graph:
     lines = open('dict.txt').read().splitlines()
     self.dictionary = set(lines)
     self.graph = self.create_graph()
+
     for line in fileinput.input():
       split = line.split()
       start, target = split[0], split[1]
@@ -42,15 +43,15 @@ class Graph:
       if s in self.dictionary and s != word:
         node.append((2, s))
 
-  def swap(self, string, i, j):
-    temp = list(string)
+  def swap(self, s, i, j):
+    temp = list(s)
     temp[i], temp[j] = temp[j], temp[i]
     return ''.join(temp)
 
   def reversal(self, word, node):
-    reversed = word[::-1]
-    if reversed in self.dictionary and word != reversed:
-      node.append((len(word), reversed))
+    reversed_word = word[::-1]
+    if reversed_word in self.dictionary and word != reversed_word:
+      node.append((len(word), reversed_word))
 
   def dijkstra(self, start, target):
     visited = set()
@@ -60,29 +61,26 @@ class Graph:
     while pq:
       current_min = heappop(pq)
       dist, u, path = current_min
-      if u not in visited:
-        path += u + ' '
-        visited.add(u)
-        if target == u:
-          retval = str(dist) + ' ' + path
-          return(retval[:-1])
+      if u in visited: continue
+      path += u + ' '
+      visited.add(u)
+      if target == u:
+        retval = str(dist) + ' ' + path
+        return(retval[:-1])
 
-        neighbors = self.graph.get(u, ())
-        for neighbor in neighbors:
-          delta, v = neighbor
-          if v in visited:
-            continue
-          newdist = dist + delta
-          if not distance.get(v) or distance[v] > newdist:
-            distance[v] = newdist
-            # Instead of decrease-key:
-            # Using insert instead of decrease-key has
-            # negligble effect on the performance of the 
-            # algorithm, as studied in this paper:
-            # http://www3.cs.stonybrook.edu/~rezaul/papers/TR-07-54.pdf
-            heappush(pq, (newdist, v, path))
+      neighbors = self.graph.get(u, [])
+      for neighbor in neighbors:
+        delta, v = neighbor
+        if v in visited: continue
+        newdist = dist + delta
+        if not distance.get(v) or distance[v] > newdist:
+          distance[v] = newdist
+          # Instead of decrease-key:
+          # Using insert instead of decrease-key has
+          # negligble effect on the performance of the 
+          # algorithm, as studied in this paper:
+          # http://www3.cs.stonybrook.edu/~rezaul/papers/TR-07-54.pdf
+          heappush(pq, (newdist, v, path))
     return -1
 
 Graph()
-
-
